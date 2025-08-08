@@ -1,3 +1,8 @@
+;;; post-init.el --- User config (post init) -*- no-byte-compile: t; lexical-binding: t; -*-
+
+;; Add your post-init customizations here. With Elpaca, prefer
+;; `elpaca-after-init-hook` instead of `after-init-hook` where needed.
+
 ; (mapc #'disable-theme custom-enabled-themes)  ; Disable all active themes
 (load-theme 'misterioso t)  ; Load the built-in theme
 

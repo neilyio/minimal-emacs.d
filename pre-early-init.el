@@ -1,3 +1,12 @@
+;;; pre-early-init.el --- User overrides (Elpaca switch) -*- no-byte-compile: t; lexical-binding: t; -*-
+
+;; Disable minimal-emacs.d's automatic package.el initialization/refresh,
+;; since Elpaca will manage packages instead.
+(setq minimal-emacs-package-initialize-and-refresh nil)
+
+;; Optional: uncomment during development to get backtraces on init errors.
+;; (setq debug-on-error t)
+
 (setq debug-on-error t)
 
 ;;; Reducing clutter in ~/.emacs.d by redirecting files to ~/.emacs.d/var/
