@@ -3,12 +3,17 @@
 ;; Add your post-init customizations here. With Elpaca, prefer
 ;; `elpaca-after-init-hook` instead of `after-init-hook` where needed.
 
-; (mapc #'disable-theme custom-enabled-themes)  ; Disable all active themes
 (load-theme 'misterioso t)  ; Load the built-in theme
 
-;; Set the default font to DejaVu Sans Mono with specific size and weight
-(set-face-attribute 'default nil
-                    :height 130 :weight 'normal :family "DejaVu Sans Mono")
+;; Font configuration for terminal Emacs
+;; Note: In terminal mode, fonts are controlled by the terminal emulator
+;; For Ghostty terminal, configure font-family in ~/.config/ghostty/config:
+;;   font-family = "Iosevka"
+;;   font-size = 13
+(when (display-graphic-p)
+  ;; Only set font in GUI mode
+  (set-face-attribute 'default nil
+                      :height 130 :weight 'normal :family "Iosevka"))
 
 ;; Native compilation enhances Emacs performance by converting Elisp code into
 ;; native machine code, resulting in faster execution and improved
@@ -359,6 +364,25 @@
   :commands (eglot-ensure
              eglot-rename
              eglot-format-buffer))
+
+;; Magit is a Git porcelain inside Emacs, providing a comprehensive interface
+;; for Git version control operations. It offers an intuitive and powerful way
+;; to stage changes, create commits, manage branches, and perform complex Git
+;; workflows directly from within Emacs.
+(use-package magit
+  :ensure t
+  :commands (magit-status
+             magit-init
+             magit-clone
+             magit-stage-file
+             magit-unstage-file)
+  :bind (("C-x g" . magit-status)
+         ("C-x M-g" . magit-dispatch))
+  :custom
+  ;; Show refined hunks for all diffs
+  (magit-diff-refine-hunk 'all)
+  ;; Show word-granularity differences within diff hunks
+  (magit-diff-refine-ignore-whitespace t))
 
 ;; The easysession Emacs package is a session manager for Emacs that can persist
 ;; and restore file editing buffers, indirect buffers/clones, Dired buffers,
@@ -863,3 +887,173 @@
   :commands server-start
   :hook
   (after-init . server-start))
+
+;; Ensure a recent Transient (gptel requires >= 0.7.4).
+(use-package transient
+  :ensure t
+  :demand t)
+
+;; gptel: LLM chat client for Emacs
+(use-package gptel
+  :ensure t
+  :commands (gptel
+             gptel-send
+             gptel-rewrite
+             gptel-menu
+             gptel-add
+             gptel-add-file)
+
+  :init
+  ;; Convenient global key bindings
+  (global-set-key (kbd "C-c g g") 'gptel)         ; Open/switch chat buffer
+  (global-set-key (kbd "C-c g s") 'gptel-send)     ; Send from any buffer/region
+  (global-set-key (kbd "C-c g r") 'gptel-rewrite)  ; Rewrite region
+  (global-set-key (kbd "C-c g m") 'gptel-menu)     ; Options menu
+
+  :custom
+  ;; Prefer curl if available; falls back to url-retrieve otherwise.
+  (gptel-use-curl t))
+
+;; Make gptel use your OPENAI_API_KEY from the environment
+;; - On macOS GUI Emacs, import it from your shell using exec-path-from-shell.
+(use-package exec-path-from-shell
+  :ensure t
+  :if (eq system-type 'darwin)
+  :demand t
+  :config
+  (exec-path-from-shell-copy-env "OPENAI_API_KEY"))
+
+;; Tell gptel how to retrieve the key (from env var)
+(setq gptel-api-key (lambda () (getenv "OPENAI_API_KEY")))
+
+;; ============================================================================
+;; gptel Emacs Lisp Code-Only Presets (loaded after gptel is ready)
+;; ============================================================================
+
+;; Define presets after gptel is fully loaded
+(with-eval-after-load 'gptel
+  ;; Define a preset that outputs only valid Emacs Lisp code
+  (gptel-make-preset 'elisp-only
+                     :description "Output only valid Emacs Lisp code with comments"
+                     :system "You are an Emacs Lisp code generator. CRITICAL RULES:
+1. Output ONLY valid Emacs Lisp code that can be evaluated directly
+2. ALL explanatory text must be in Lisp comments (;; for line comments)
+3. Use docstrings for function documentation
+4. NO markdown, NO prose outside of comments
+5. Code must be syntactically correct and ready to evaluate with C-x C-e
+6. Use descriptive variable names and add inline comments for clarity
+7. If providing examples, make them working code with ;; Example: comments
+8. Structure: comments explaining approach, then working code, then usage examples in comments"
+                     :temperature 0.3
+                     :max-tokens 1500)
+
+  ;; Alternative preset for interactive coding assistance
+  (gptel-make-preset 'elisp-assistant
+                     :description "Interactive Emacs Lisp coding assistant"
+                     :system "You are an expert Emacs Lisp programmer. Respond with:
+1. Brief explanation as ;; comments at the top
+2. Clean, working Elisp code
+3. Usage examples as ;; commented code at bottom
+4. ALL text must be valid Lisp (either code or comments)
+5. Focus on idiomatic, efficient Elisp patterns
+6. Include error handling where appropriate"
+                     :temperature 0.2)
+
+  ;; Preset for code review and improvement
+  (gptel-make-preset 'elisp-review
+                     :description "Review and improve Elisp code"
+                     :system "You are reviewing Emacs Lisp code. Provide:
+1. ;; Analysis comments about the code
+2. Improved version of the code
+3. ;; Comments explaining improvements
+4. ;; Alternative approaches if relevant
+5. ALL output must be valid Elisp (code + comments only)
+6. Focus on performance, readability, and Elisp best practices"
+                     :temperature 0.1)
+
+  (message "gptel presets loaded: elisp-only, elisp-assistant, elisp-review"))
+
+;; ============================================================================
+;; Magit - Git interface for Emacs
+;; ============================================================================
+
+;; Magit is a complete text-based user interface to Git
+(use-package magit
+  :ensure t
+  :bind (("C-x g" . magit-status)
+         ("C-x M-g" . magit-dispatch)
+         ("C-c M-g" . magit-file-popup))
+  :config
+  ;; Show refined hunks for all diffs
+  (setq magit-diff-refine-hunk 'all)
+
+  ;; Use full-frame magit-status
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
+
+  ;; Automatically refresh magit buffers
+  (setq magit-refresh-status-buffer t))
+
+
+;; Difftastic - Structural diff tool integration
+;; Requires: difftastic binary `difft` available on PATH
+;; Install with: brew install difftastic
+(use-package difftastic
+  :ensure t
+  :demand t
+  :bind (:map magit-blame-read-only-mode-map
+              ("M-RET" . difftastic-magit-show))
+  :magic-fallback (("^--- a/" . difftastic-mode))
+  :config
+  ;; Enable difftastic keybindings in relevant modes
+  (difftastic-bindings-mode 1)
+
+
+  )
+
+
+;; ============================================================================
+;; Terminal Mouse Support
+;; ============================================================================
+
+;; Enable mouse support when running Emacs in a terminal
+(when (not (display-graphic-p))
+  (cond
+   ;; For xterm-compatible terminals (most terminal emulators)
+   ((or (getenv "XTERM_VERSION")
+        (string-match-p "xterm\\|screen\\|tmux\\|alacritty\\|kitty\\|iterm"
+                        (or (getenv "TERM") "")))
+    (xterm-mouse-mode 1)
+    (message "Enabled xterm mouse mode for terminal"))
+
+   ;; For Linux console with GPM
+   ((and (eq system-type 'gnu/linux)
+         (string-match-p "linux" (or (getenv "TERM") ""))
+         (executable-find "gpm"))
+    (gpm-mouse-mode 1)
+    (message "Enabled GPM mouse mode for Linux console"))
+
+   ;; Fallback: try xterm-mouse-mode for other terminals
+   (t
+    (condition-case nil
+        (progn
+          (xterm-mouse-mode 1)
+          (message "Enabled xterm mouse mode (fallback)"))
+      (error
+       (message "Mouse support not available in this terminal"))))))
+
+;; ============================================================================
+;; Clipetty - Terminal Clipboard Integration
+;; ============================================================================
+
+;; Clipetty enables clipboard integration for terminal Emacs users
+;; Supports OSC 52 escape sequences with tmux/screen support
+(use-package clipetty
+  :ensure t
+  :hook (after-init . global-clipetty-mode)
+
+  :custom
+  ;; Assume nested multiplexer setup (e.g., local tmux + remote tmux)
+  (clipetty-assume-nested-mux t)
+
+  ;; Command to query tmux's SSH_TTY environment variable
+  (clipetty-tmux-ssh-tty "tmux show-environment SSH_TTY"))
