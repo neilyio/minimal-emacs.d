@@ -1049,8 +1049,10 @@
 ;; Supports OSC 52 escape sequences with tmux/screen support
 (use-package clipetty
   :ensure t
-  :hook (after-init . global-clipetty-mode)
-
+  :demand t  ; Force immediate loading
+  :config
+  (global-clipetty-mode 1)  ; Enable the mode explicitly in config
+  
   :custom
   ;; Assume nested multiplexer setup (e.g., local tmux + remote tmux)
   (clipetty-assume-nested-mux t)
