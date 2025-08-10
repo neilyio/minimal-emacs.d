@@ -3,7 +3,29 @@
 ;; Add your post-init customizations here. With Elpaca, prefer
 ;; `elpaca-after-init-hook` instead of `after-init-hook` where needed.
 
-(load-theme 'misterioso t)  ; Load the built-in theme
+;; Ef themes - Colorful and legible themes with red-green colorblind support
+;; For red-green color deficiency (deuteranopia), use ef-deuteranopia-dark or ef-deuteranopia-light
+(use-package ef-themes
+  :ensure t
+  :demand t
+  :init
+  ;; Disable other themes to avoid conflicts
+  (mapc #'disable-theme custom-enabled-themes)
+
+  ;; Enable mixed fonts and variable pitch UI if desired
+  (setq ef-themes-mixed-fonts t
+        ef-themes-variable-pitch-ui t)
+
+  :config
+  ;; Load the dark deuteranopia theme by default
+  (ef-themes-select 'ef-dream)
+
+  :bind
+  ;; Convenient key bindings for theme switching
+  (("C-c t t" . ef-themes-toggle)
+   ("C-c t s" . ef-themes-select)
+   ("C-c t l" . ef-themes-select-light)
+   ("C-c t d" . ef-themes-select-dark)))
 
 ;; Font configuration for terminal Emacs
 ;; Note: In terminal mode, fonts are controlled by the terminal emulator
@@ -28,7 +50,7 @@
   ;; Set `compile-angel-verbose` to nil to suppress output from compile-angel.
   ;; Drawback: The minibuffer will not display compile-angel's actions.
   (compile-angel-verbose t)
-  
+
 
   :config
   (setq compile-angel-enable-byte-compile nil) ; byte compile causes weird errors
