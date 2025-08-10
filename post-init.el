@@ -1081,3 +1081,111 @@
 
   ;; Command to query tmux's SSH_TTY environment variable
   (clipetty-tmux-ssh-tty "tmux show-environment SSH_TTY"))
+
+;; ============================================================================
+;; Eat - Terminal Emulator
+;; ============================================================================
+
+;; Eat is a semi-graphical terminal emulator that runs within Emacs
+;; Required as backend for claude-code.el
+(use-package eat
+  :ensure t
+  :custom
+  ;; Enable mouse support in Eat terminals
+  (eat-enable-mouse t)
+  ;; Control scrollback size for longer conversations
+  (eat-term-scrollback-size 500000))
+
+;; ============================================================================
+;; WebSocket - Required for Monet
+;; ============================================================================
+
+(use-package websocket
+  :ensure t)
+
+;; ============================================================================
+;; Monet - Claude Code IDE Protocol (Optional)
+;; ============================================================================
+
+;; Monet implements the Claude Code IDE protocol for Emacs integration
+;; Load this before claude-code so it's available when claude-code loads
+(use-package monet
+  :ensure (:host github :repo "stevemolitor/monet")
+  :after websocket
+  :custom
+  ;; Use ediff for interactive diff editing
+  (monet-diff-tool #'monet-ediff-tool)
+  (monet-diff-cleanup-tool #'monet-ediff-cleanup-tool)
+  
+  ;; Customize ediff window split direction (horizontal or vertical)
+  (monet-ediff-split-window-direction 'horizontal)
+  
+  ;; Customize diff keybindings
+  (monet-ediff-accept-key "C-c C-c")
+  (monet-ediff-quit-key "q")
+  (monet-simple-diff-accept-key "y")
+  (monet-simple-diff-quit-key "q")
+  
+  ;; Log buffer name
+  (monet-log-buffer-name "*Monet Log*"))
+
+;; ============================================================================
+;; Claude Code - Claude Code client for Emacs
+;; ============================================================================
+
+;; Claude Code client that runs directly inside Emacs using Eat terminal
+(use-package claude-code
+  :ensure t
+  :vc (:url "https://github.com/stevemolitor/claude-code.el" :rev :newest)
+  :after eat
+  :bind-keymap ("C-c c" . claude-code-command-map)
+  :bind
+  ;; Optional repeat map for cycling through modes
+  (:repeat-map claude-code-repeat-map
+               ("M" . claude-code-cycle-mode))
+  :init
+  ;; Start Emacs server for hook integration if not already running
+  (unless (server-running-p)
+    (server-start))
+  
+  :config
+  ;; Optional IDE integration with Monet (following README exactly)
+  (when (fboundp 'monet-start-server-function)
+    (add-hook 'claude-code-process-environment-functions #'monet-start-server-function)
+    (monet-mode 1))
+  
+  ;; Enable claude-code-mode
+  (claude-code-mode)
+  
+  ;; Reduce flickering in eat terminal
+  (add-hook 'claude-code-start-hook
+            (lambda ()
+              (setq-local eat-minimum-latency 0.033
+                          eat-maximum-latency 0.1)
+              ;; Reduce line spacing to fix vertical bar gaps
+              (setq-local line-spacing 0.1)))
+  
+  :custom
+  ;; Use eat as the terminal backend
+  (claude-code-terminal-backend 'eat)
+  
+  ;; Terminal type for color support
+  (claude-code-term-name "xterm-256color")
+  
+  ;; Buffer size threshold for confirmation
+  (claude-code-large-buffer-threshold 100000)
+  
+  ;; Enable notifications when Claude finishes
+  (claude-code-enable-notifications t)
+  
+  ;; Confirm before killing instances
+  (claude-code-confirm-kill t)
+  
+  ;; Window resize optimization
+  (claude-code-optimize-window-resize t)
+  
+  ;; Newline keybinding style
+  (claude-code-newline-keybinding-style 'newline-on-shift-return)
+  
+  ;; Cursor type in read-only mode for eat
+  (claude-code-eat-read-only-mode-cursor-type '(bar nil nil)))
