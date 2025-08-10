@@ -3,6 +3,20 @@
 ;; Add your post-init customizations here. With Elpaca, prefer
 ;; `elpaca-after-init-hook` instead of `after-init-hook` where needed.
 
+;; Load all .el files from functions/ directory
+(let ((functions-dir (expand-file-name "functions" user-emacs-directory)))
+  (when (file-directory-p functions-dir)
+    (add-to-list 'load-path functions-dir)
+    (dolist (file (directory-files functions-dir t "\\.el$"))
+      (load file nil t))))
+
+;; Load catpaths-mode using use-package
+(use-package catpaths-mode
+  :ensure nil  ; Don't try to download, it's local
+  :load-path "~/.emacs.d/modes/catpaths"
+  :commands (catpaths catpaths-mode)
+  :defer t)
+
 ;; Ef themes - Colorful and legible themes with red-green colorblind support
 ;; For red-green color deficiency (deuteranopia), use ef-deuteranopia-dark or ef-deuteranopia-light
 (use-package ef-themes
