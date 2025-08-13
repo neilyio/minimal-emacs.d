@@ -420,6 +420,25 @@
   ;; Show word-granularity differences within diff hunks
   (magit-diff-refine-ignore-whitespace t))
 
+;; The auth-sources variable controls how and where Auth-Source keeps its secrets.
+;; The default value is a list of three files: ("~/.authinfo" "~/.authinfo.gpg" "~/.netrc"),
+;; but that can lead to confusing behavior, so you should make sure that only one of these
+;; files exists, and then you should also adjust the value of the variable to only ever use that file.
+;;
+;; Tokens like your GitHub personal access token go in this file. For GitHub, add this:
+;; machine api.github.com login neilyio^forge password <TOKEN>
+;;
+;; You'll need to config git globally with your GitHub user name.
+;; git config --global github.user neilyio
+;;
+;; Finish by typing M-x auth-source-forget-all-cached RET.
+;; If you don’t do this, then Auth-Source may fail to look up the token.
+(setq auth-sources '("~/.authinfo"))
+
+(use-package forge
+  :ensure t
+  :after magit)
+
 ;; The easysession Emacs package is a session manager for Emacs that can persist
 ;; and restore file editing buffers, indirect buffers/clones, Dired buffers,
 ;; windows/splits, the built-in tab-bar (including tabs, their buffers, and
@@ -1088,7 +1107,7 @@
   :demand t  ; Force immediate loading
   :config
   (global-clipetty-mode 1)  ; Enable the mode explicitly in config
-  
+
   :custom
   ;; Assume nested multiplexer setup (e.g., local tmux + remote tmux)
   (clipetty-assume-nested-mux t)
@@ -1130,16 +1149,16 @@
   ;; Use ediff for interactive diff editing
   (monet-diff-tool #'monet-ediff-tool)
   (monet-diff-cleanup-tool #'monet-ediff-cleanup-tool)
-  
+
   ;; Customize ediff window split direction (horizontal or vertical)
   (monet-ediff-split-window-direction 'horizontal)
-  
+
   ;; Customize diff keybindings
   (monet-ediff-accept-key "C-c C-c")
   (monet-ediff-quit-key "q")
   (monet-simple-diff-accept-key "y")
   (monet-simple-diff-quit-key "q")
-  
+
   ;; Log buffer name
   (monet-log-buffer-name "*Monet Log*"))
 
@@ -1161,16 +1180,16 @@
   ;; Start Emacs server for hook integration if not already running
   (unless (server-running-p)
     (server-start))
-  
+
   :config
   ;; Optional IDE integration with Monet (following README exactly)
   (when (fboundp 'monet-start-server-function)
     (add-hook 'claude-code-process-environment-functions #'monet-start-server-function)
     (monet-mode 1))
-  
+
   ;; Enable claude-code-mode
   (claude-code-mode)
-  
+
   ;; Reduce flickering in eat terminal
   (add-hook 'claude-code-start-hook
             (lambda ()
@@ -1178,28 +1197,28 @@
                           eat-maximum-latency 0.1)
               ;; Reduce line spacing to fix vertical bar gaps
               (setq-local line-spacing 0.1)))
-  
+
   :custom
   ;; Use eat as the terminal backend
   (claude-code-terminal-backend 'eat)
-  
+
   ;; Terminal type for color support
   (claude-code-term-name "xterm-256color")
-  
+
   ;; Buffer size threshold for confirmation
   (claude-code-large-buffer-threshold 100000)
-  
+
   ;; Enable notifications when Claude finishes
   (claude-code-enable-notifications t)
-  
+
   ;; Confirm before killing instances
   (claude-code-confirm-kill t)
-  
+
   ;; Window resize optimization
   (claude-code-optimize-window-resize t)
-  
+
   ;; Newline keybinding style
   (claude-code-newline-keybinding-style 'newline-on-shift-return)
-  
+
   ;; Cursor type in read-only mode for eat
   (claude-code-eat-read-only-mode-cursor-type '(bar nil nil)))
