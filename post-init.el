@@ -401,24 +401,32 @@
              eglot-rename
              eglot-format-buffer))
 
+;; Consult-eglot provides a consulting-read interface for eglot's workspace/symbol
+;; LSP procedure call, similar to consult-lsp but for eglot
+(use-package consult-eglot
+  :ensure t
+  :commands (consult-eglot-symbols)
+  :after (consult eglot))
+
 ;; Magit is a Git porcelain inside Emacs, providing a comprehensive interface
 ;; for Git version control operations. It offers an intuitive and powerful way
 ;; to stage changes, create commits, manage branches, and perform complex Git
 ;; workflows directly from within Emacs.
 (use-package magit
   :ensure t
-  :commands (magit-status
-             magit-init
-             magit-clone
-             magit-stage-file
-             magit-unstage-file)
   :bind (("C-x g" . magit-status)
-         ("C-x M-g" . magit-dispatch))
-  :custom
+         ("C-x M-g" . magit-dispatch)
+         ("C-c M-g" . magit-file-popup))
+  :config
   ;; Show refined hunks for all diffs
-  (magit-diff-refine-hunk 'all)
-  ;; Show word-granularity differences within diff hunks
-  (magit-diff-refine-ignore-whitespace t))
+  (setq magit-diff-refine-hunk 'all)
+
+  ;; Use full-frame magit-status
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
+  (setq magit-bury-buffer-function 'magit-restore-window-configuration)
+
+  ;; Automatically refresh magit buffers
+  (setq magit-refresh-status-buffer t))
 
 ;; The auth-sources variable controls how and where Auth-Source keeps its secrets.
 ;; The default value is a list of three files: ("~/.authinfo" "~/.authinfo.gpg" "~/.netrc"),
@@ -1027,44 +1035,6 @@
                      :temperature 0.1)
 
   (message "gptel presets loaded: elisp-only, elisp-assistant, elisp-review"))
-
-;; ============================================================================
-;; Magit - Git interface for Emacs
-;; ============================================================================
-
-;; Magit is a complete text-based user interface to Git
-(use-package magit
-  :ensure t
-  :bind (("C-x g" . magit-status)
-         ("C-x M-g" . magit-dispatch)
-         ("C-c M-g" . magit-file-popup))
-  :config
-  ;; Show refined hunks for all diffs
-  (setq magit-diff-refine-hunk 'all)
-
-  ;; Use full-frame magit-status
-  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
-
-  ;; Automatically refresh magit buffers
-  (setq magit-refresh-status-buffer t))
-
-
-;; Difftastic - Structural diff tool integration
-;; Requires: difftastic binary `difft` available on PATH
-;; Install with: brew install difftastic
-(use-package difftastic
-  :ensure t
-  :demand t
-  :bind (:map magit-blame-read-only-mode-map
-              ("M-RET" . difftastic-magit-show))
-  :magic-fallback (("^--- a/" . difftastic-mode))
-  :config
-  ;; Enable difftastic keybindings in relevant modes
-  (difftastic-bindings-mode 1)
-
-
-  )
-
 
 ;; ============================================================================
 ;; Terminal Mouse Support
