@@ -14,3 +14,6 @@
 (setq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
 (setq minimal-emacs-optimize-file-name-handler-alist nil)
+
+;; Set shell name for emulated terminals.
+(setq shell-file-name "/opt/homebrew/bin/fish")
