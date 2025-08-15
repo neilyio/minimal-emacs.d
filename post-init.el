@@ -958,23 +958,14 @@
 
 ;; gptel: LLM chat client for Emacs
 (use-package gptel
-  :ensure t
-  :commands (gptel
-             gptel-send
-             gptel-rewrite
-             gptel-menu
-             gptel-add
-             gptel-add-file)
-
-  :init
-  ;; Convenient global key bindings
-  (global-set-key (kbd "C-c g g") 'gptel)         ; Open/switch chat buffer
-  (global-set-key (kbd "C-c g s") 'gptel-send)     ; Send from any buffer/region
-  (global-set-key (kbd "C-c g r") 'gptel-rewrite)  ; Rewrite region
-  (global-set-key (kbd "C-c g m") 'gptel-menu)     ; Options menu
-
+  :elpaca (gptel :host github :repo "karthink/gptel")
+  :hook ((gptel-post-stream-hook . gptel-auto-scroll)          ; auto-scroll while streaming
+         (gptel-post-response-functions . gptel-end-of-response)) ; jump to next prompt after insert
+  :bind (("C-c g g" . gptel)
+         ("C-c g s" . gptel-send)
+         ("C-c g r" . gptel-rewrite)
+         ("C-c g m" . gptel-menu))
   :custom
-  ;; Prefer curl if available; falls back to url-retrieve otherwise.
   (gptel-use-curl t))
 
 ;; Make gptel use your OPENAI_API_KEY from the environment
