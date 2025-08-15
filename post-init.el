@@ -173,6 +173,8 @@
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
   (text-mode-ispell-word-completion nil)
   (tab-always-indent 'complete)
+  (corfu-auto t)
+  (corfu-quit-no-match 'separator)
 
   ;; Enable Corfu
   :config
