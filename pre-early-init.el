@@ -17,3 +17,7 @@
 
 ;; Set shell name for emulated terminals.
 (setq shell-file-name "/opt/homebrew/bin/fish")
+
+;; Up limit to resolve "Selection too long to send to terminal" error
+;; when running in terminal vterm mode.
+(setq xterm-max-cut-length 1000000)
