@@ -990,8 +990,8 @@
 (with-eval-after-load 'gptel
   ;; Define a preset that outputs only valid Emacs Lisp code
   (gptel-make-preset 'elisp-only
-    :description "Output only valid Emacs Lisp code with comments"
-    :system "You are an Emacs Lisp code generator. CRITICAL RULES:
+                     :description "Output only valid Emacs Lisp code with comments"
+                     :system "You are an Emacs Lisp code generator. CRITICAL RULES:
 1. Output ONLY valid Emacs Lisp code that can be evaluated directly
 2. ALL explanatory text must be in Lisp comments (;; for line comments)
 3. Use docstrings for function documentation
@@ -1000,32 +1000,32 @@
 6. Use descriptive variable names and add inline comments for clarity
 7. If providing examples, make them working code with ;; Example: comments
 8. Structure: comments explaining approach, then working code, then usage examples in comments"
-    :temperature 0.3
-    :max-tokens 1500)
+                     :temperature 0.3
+                     :max-tokens 1500)
 
   ;; Alternative preset for interactive coding assistance
   (gptel-make-preset 'elisp-assistant
-    :description "Interactive Emacs Lisp coding assistant"
-    :system "You are an expert Emacs Lisp programmer. Respond with:
+                     :description "Interactive Emacs Lisp coding assistant"
+                     :system "You are an expert Emacs Lisp programmer. Respond with:
 1. Brief explanation as ;; comments at the top
 2. Clean, working Elisp code
 3. Usage examples as ;; commented code at bottom
 4. ALL text must be valid Lisp (either code or comments)
 5. Focus on idiomatic, efficient Elisp patterns
 6. Include error handling where appropriate"
-    :temperature 0.2)
+                     :temperature 0.2)
 
   ;; Preset for code review and improvement
   (gptel-make-preset 'elisp-review
-    :description "Review and improve Elisp code"
-    :system "You are reviewing Emacs Lisp code. Provide:
+                     :description "Review and improve Elisp code"
+                     :system "You are reviewing Emacs Lisp code. Provide:
 1. ;; Analysis comments about the code
 2. Improved version of the code
 3. ;; Comments explaining improvements
 4. ;; Alternative approaches if relevant
 5. ALL output must be valid Elisp (code + comments only)
 6. Focus on performance, readability, and Elisp best practices"
-    :temperature 0.1)
+                     :temperature 0.1)
 
   (message "gptel presets loaded: elisp-only, elisp-assistant, elisp-review"))
 
