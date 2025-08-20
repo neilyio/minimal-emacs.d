@@ -1187,3 +1187,11 @@
 
   ;; Cursor type in read-only mode for eat
   (claude-code-eat-read-only-mode-cursor-type '(bar nil nil)))
+
+(use-package howm
+  :ensure t
+  :init
+  (require 'howm-markdown) ;; Write notes in markdown-mode.
+  (setq howm-directory "~/Documents/howm") ;; Where to store the files?
+  (setq howm-follow-theme t) ;; Use your Emacs theme colors.
+  (setq howm-menu-refresh-after-save t))
