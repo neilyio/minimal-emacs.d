@@ -858,17 +858,6 @@
   (which-key-add-column-padding 1)
   (which-key-max-description-length 40))
 
-(unless (and (eq window-system 'mac)
-             (bound-and-true-p mac-carbon-version-string))
-  ;; Enables `pixel-scroll-precision-mode' on all operating systems and Emacs
-  ;; versions, except for emacs-mac.
-  ;;
-  ;; Enabling `pixel-scroll-precision-mode' is unnecessary with emacs-mac, as
-  ;; this version of Emacs natively supports smooth scrolling.
-  ;; https://bitbucket.org/mituharu/emacs-mac/commits/65c6c96f27afa446df6f9d8eff63f9cc012cc738
-  (setq pixel-scroll-precision-use-momentum nil) ; Precise/smoother scrolling
-  (pixel-scroll-precision-mode 1))
-
 ;; Display the time in the modeline
 (add-hook 'after-init-hook #'display-time-mode)
 
@@ -1195,3 +1184,14 @@
   (setq howm-directory "~/Documents/howm") ;; Where to store the files?
   (setq howm-follow-theme t) ;; Use your Emacs theme colors.
   (setq howm-menu-refresh-after-save t))
+
+
+(use-package ultra-scroll
+  :vc t ; (:url "https://github.com/neilyio/ultra-scroll")
+  :load-path "/Users/neil/Documents/ultra-scroll"
+  :init
+  (setq scroll-conservatively 101 ; or whatever value you prefer, since v0.4
+        mouse-wheel-progressive-speed nil
+        scroll-margin 0)        ; important: scroll-margin>0 not yet supported
+  :config
+  (ultra-scroll-mode 1))
